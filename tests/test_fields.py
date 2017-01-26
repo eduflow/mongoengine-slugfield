@@ -1,33 +1,9 @@
+# -*- coding: utf-8 -*-
 import pytest
 
 from mongoengine import Document, StringField
 from mongoengine.errors import ValidationError
-from mongoengine_extras.fields import SlugField, AutoSlugField
-
-
-def test_slug_validation():
-    class Article(Document):
-        slug = SlugField()
-
-    article = Article()
-    article.slug = 'my-slug-identifier-here'
-    article.validate()
-
-    article.slug = 'my slug identifier here'
-    with pytest.raises(ValidationError):
-        article.validate()
-
-    article.slug = 'My slug identifier here'
-    with pytest.raises(ValidationError):
-        article.validate()
-
-    # Generally want to avoid creating a slug like these but
-    # they should still validate
-    article.slug = 'my-slug_identifier-here'
-    article.validate()
-
-    article.slug = 'My-Slug-Identifier-Here'
-    article.validate()
+from mongoengine_slugfield.fields import SlugField
 
 
 def test_auto_slug_creation(conn):
@@ -42,7 +18,7 @@ def test_auto_slug_creation(conn):
 
     class Article(Document):
         title = StringField()
-        slug = AutoSlugField()
+        slug = SlugField()
 
     first_doc = Article()
     first_doc.slug = 'My document title'
@@ -70,7 +46,7 @@ def test_auto_slug_creation(conn):
 def test_auto_slug_nonalphachars(conn):
     class Article(Document):
         title = StringField()
-        slug = AutoSlugField()
+        slug = SlugField()
 
     article = Article()
     article.slug = " Here's a nice headline, enjoy it?/"
@@ -78,14 +54,14 @@ def test_auto_slug_nonalphachars(conn):
     assert article.slug == 'heres-a-nice-headline-enjoy-it'
 
 
-def test_autoslugfield_populate_from(auto_slug_document):
+def test_SlugField_populate_from(auto_slug_document):
     document = auto_slug_document()
     document.name = 'Auto Slug Document'
     document.save()
     assert document.slug == 'auto-slug-document'
 
 
-def test_autoslugfield_generate_next_slug(auto_slug_document):
+def test_SlugField_generate_next_slug(auto_slug_document):
     document = auto_slug_document()
     document.name = 'Auto Slug Document'
     document.save()
@@ -102,7 +78,7 @@ def test_autoslugfield_generate_next_slug(auto_slug_document):
     assert document.slug == 'auto-slug-document-2'
 
 
-def test_autoslugfield_doesnt_change_after_saving(auto_slug_document):
+def test_SlugField_doesnt_change_after_saving(auto_slug_document):
     document = auto_slug_document()
     document.name = 'Auto Slug Document'
     document.save()
@@ -120,8 +96,8 @@ def test_multiple_autoslug_fields(conn):
     class FooDocument(Document):
         name = StringField()
         name1 = StringField()
-        slug = AutoSlugField(populate_from='name')
-        slug1 = AutoSlugField(populate_from='name1')
+        slug = SlugField(populate_from='name')
+        slug1 = SlugField(populate_from='name1')
 
     document = FooDocument()
     document.name = 'Auto Slug Document'
@@ -139,7 +115,7 @@ def test_multiple_autoslug_fields(conn):
 def test_always_update_autoslug_field_must_change(conn):
     class AutoUpdateDocument(Document):
         name = StringField()
-        slug = AutoSlugField(populate_from='name', always_update=True)
+        slug = SlugField(populate_from='name', always_update=True)
 
     document = AutoUpdateDocument()
     document.name = 'Auto Slug Document'
@@ -151,11 +127,55 @@ def test_always_update_autoslug_field_must_change(conn):
     assert document.slug == 'i-can-haz-new-slug'
 
 
-def test_autoslugfield_populate_from_unexisting_field_should_fail(conn):
-    class PopulateFromUnexistentDocument(Document):
-        slug = AutoSlugField(populate_from='unexistent')
+def test_unicode_slugify(conn):
+    class PageWithUnicodeSlug(Document):
+        title = StringField()
+        slug = SlugField(populate_from='title')
 
-    document = PopulateFromUnexistentDocument()
+    document = PageWithUnicodeSlug(title=u'Мобильные технологии в образовании')
+    document.save()
 
-    with pytest.raises(AttributeError):
-        document.save()
+    assert document.slug == u'мобильные-технологии-в-образовании'
+
+
+def test_no_unicode_slugify(conn):
+    class PageWithUnicodeSlug(Document):
+        title = StringField()
+        slug = SlugField(populate_from='title', allow_unicode=False)
+
+    document = PageWithUnicodeSlug(title=u'Мобильные технологии в образовании')
+    document.save()
+
+    assert document.slug == u'mobilnye-tekhnologii-v-obrazovanii'
+
+
+def test_slugify(conn):
+    class Page(Document):
+        title = StringField()
+        slug = SlugField(populate_from='title')
+    page = Page(title=u'Я ♥ борщ').save()
+    assert page.slug == u'\u044f-\u0431\u043e\u0440\u0449'
+    # >>> print page.slug
+    # я-борщ
+
+
+def test_allow_unicode(conn):
+    '''Test that setting `allow_unicode` to `False` will transliterate unicode
+    characters to ascii'''
+    class Page(Document):
+        title = StringField()
+        slug = SlugField(populate_from='title', allow_unicode=False)
+    page = Page(title=u'Я ♥ борщ').save()
+    assert page.slug == u'ia-borshch'
+
+
+def test_slugify_kwargs(conn):
+    '''Test than parameters can be passed directly to `awesome-slugify`'s
+    `Slugify()`-class with `slugify_kwargs`'''
+    custom_slugify_args = {'pretranslate': {u'я': u'i', u'♥': u'love'}}
+    class Page(Document):
+        title = StringField()
+        slug = SlugField(populate_from='title', allow_unicode=False, slugify_kwargs=custom_slugify_args)
+    page = Page(title=u'Я ♥ борщ').save()
+    assert page.title == u'\u042f \u2665 \u0431\u043e\u0440\u0449'
+    assert page.slug == u'i-love-borshch'

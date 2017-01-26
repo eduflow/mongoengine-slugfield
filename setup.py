@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from setuptools import setup, find_packages
 
 DESCRIPTION = "A SlugField for MongoEngine."
@@ -28,6 +29,6 @@ setup(name='mongoengine-slugfield',
           'Topic :: Database',
           'Topic :: Software Development :: Libraries :: Python Modules',
       ],
-      install_requires=['mongoengine'],
+      install_requires=['mongoengine', 'blinker', 'awesome-slugify'],
       test_suite='tests',
 )

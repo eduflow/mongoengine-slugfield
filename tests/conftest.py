@@ -1,6 +1,6 @@
 import pytest
 from mongoengine import connect, Document, StringField
-from mongoengine_extras.fields import AutoSlugField
+from mongoengine_slugfield.fields import SlugField
 
 
 DB_NAME = 'test_mongonengine_extras'
@@ -22,7 +22,7 @@ def auto_slug_document(request, conn):
 
     class _Document(Document):
         name = StringField()
-        slug = AutoSlugField(populate_from='name')
+        slug = SlugField(populate_from='name')
 
     def teardown():
         _Document.drop_collection()

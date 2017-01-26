@@ -9,11 +9,12 @@ to slugify.
 The raison d'être for this package is two-fold:
 
 1. The original `AutoSlugField` doesn't work for string that are fully unicode,
-   e.g. `Мобильные технологии в образовании`  
-   -- Using `AutoSlugField` on the above string will create an "empty" slug, causing an error.
-2. This package meant to only contain `SlugField` -- no other fields.
-  
+   e.g. `Мобильные технологии в образовании`
+   – Using `AutoSlugField` on the above string will create an "empty" slug, causing an error.
+2. This package meant to only contain `SlugField` – no other fields.
 
+
+[bennylope/mongoengine-extras]: https://github.com/bennylope/mongoengine-extras
 [dimka665/awesome-slugify]: https://github.com/dimka665/awesome-slugify
 
 Installing
@@ -36,7 +37,7 @@ mongoengine-slugfield requires MongoEngine (which requires pymongo).
 Tests
 -----
 
-The tests can by run with `python setup.py test`. Tests require a MongoDB 
+The tests can by run with `python setup.py test`. Tests require a MongoDB
 database running on the standard port.
 
 Authors

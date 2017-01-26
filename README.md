@@ -33,7 +33,11 @@ Installing
 
 Using pip:
 
-    pip install 'git+git@github.com:peergradeio/mongoengine-slugfield.git#egg=mongoengine-slugfield'
+    pip install 'git+git://github.com/peergradeio/mongoengine-slugfield.git@master#egg=mongoengine-slugfield'
+
+For "hands on" developers you can do a git clone into your virtualenv like this:
+
+    pip install -e 'git+git@github.com:peergradeio/mongoengine-slugfield.git#egg=mongoengine-slugfield'
 
 Usage
 -----

@@ -1,19 +1,19 @@
 from setuptools import setup, find_packages
 
-DESCRIPTION = "Extra fields and utilities for mongoengine."
+DESCRIPTION = "A SlugField for MongoEngine."
 
 try:
-    LONG_DESCRIPTION = open('README.rst').read()
+    LONG_DESCRIPTION = open('README.md').read()
 except:
     LONG_DESCRIPTION = DESCRIPTION
 
 
-setup(name='mongoengine-extras',
+setup(name='mongoengine-slugfield',
       version='0.0.1',
       packages=find_packages(),
-      author='Ben Lopatin',
-      author_email='ben.lopatin@wellfireinteractive.com',
-      url='https://github.com/bennylope/mongoengine-extras',
+      author='Malthe Jørgensen',
+      author_email='malthe.jorgensen@gmail.com',
+      url='https://github.com/peergradeio/mongoengine-slugfield',
       license='Public Domain',
       include_package_data=True,
       description=DESCRIPTION,

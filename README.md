@@ -3,16 +3,24 @@ mongoengine-slugfield
 
 `mongoengine-slugfield` is a fork of [bennylope/mongoengine-extras] that
 only seeks to implement `SlugField` (similar to `AutoSlugField` in the
-original packaage) and uses the [dimka665/awesome-slugify]-package
+original package) and uses the [dimka665/awesome-slugify]-package
 to slugify.
 
 The raison d'être for this package is two-fold:
 
-1. The original `AutoSlugField` doesn't work for string that are fully unicode,
+1. The original `AutoSlugField` doesn't work for strings that are fully unicode,
    e.g. `Мобильные технологии в образовании`
    – Using `AutoSlugField` on the above string will create an "empty" slug, causing an error.
-2. This package meant to only contain `SlugField` – no other fields.
+2. This package is meant to only contain `SlugField` – no other fields.
 
+Note that this package will slugify to slugs _with_ unicode chars by default, e.g.:
+
+    u'ættarsamfélagið'
+
+will be slugified to:
+
+    u'ættarsamfélagið'  # this package (mongoengine_slugfield)
+    u'ttarsamfelagi'    # mongoengine_extras
 
 [bennylope/mongoengine-extras]: https://github.com/bennylope/mongoengine-extras
 [dimka665/awesome-slugify]: https://github.com/dimka665/awesome-slugify
@@ -35,7 +43,7 @@ Using pip:
 
     pip install 'git+git://github.com/peergradeio/mongoengine-slugfield.git@master#egg=mongoengine-slugfield'
 
-For "hands on" developers you can do a git clone into your virtualenv like this:
+"Hands on" developers can do a git clone into their virtualenv like this:
 
     pip install -e 'git+git@github.com:peergradeio/mongoengine-slugfield.git#egg=mongoengine-slugfield'
 
@@ -46,7 +54,7 @@ Import `SlugField` from this package
     >>> from mongoengine_slugfield import SlugField
 
 and then use as you would a normal MongoEngine field.
-The `populate_from`-parameter set which field to create the slug from:
+The `populate_from`-parameter determines which field to create the slug from:
 
     >>> class Page(Document):
     ...     title = StringField()
@@ -55,7 +63,8 @@ The `populate_from`-parameter set which field to create the slug from:
     >>> page.slug
     u'я-борщ''
 
-setting `allow_unicode` to `False` will transliterate unicode characters to ascii
+setting `allow_unicode` to `False` will transliterate unicode characters to ascii  
+(`allow_unicode` is `True` by default)
 
     >> class Page(Document):
     ..     title = StringField()

@@ -30,6 +30,7 @@ class SlugField(StringField):
         self.populate_from = kwargs.pop('populate_from', None)
         self.always_update = kwargs.pop('always_update', False)
         self.allow_unicode = kwargs.pop('allow_unicode', True)
+        self.queryset_manager = kwargs.pop('queryset_manager', 'objects')
         kwargs['unique'] = True
 
         slugify_kwargs = kwargs.pop('slugify_kwargs', {})
@@ -47,7 +48,7 @@ class SlugField(StringField):
         count = 1
         slug = slug_attempt = self._slugify(value)
         cls = instance.__class__
-        while cls.objects(**{self.db_field: slug_attempt}).count() > 0:
+        while getattr(cls, self.queryset_manager)(**{self.db_field: slug_attempt}).count() > 0:
             slug_attempt = '%s-%s' % (slug, count)
             count += 1
         return slug_attempt

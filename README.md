@@ -86,6 +86,33 @@ with `slugify_kwargs`
     u'i-love-borshch'
 
 
+lastly if you use a custom queryset for `objects`, you can make `SlugField` use
+a different attribute to look up duplicates:
+
+    >>> class Page(Document):
+    ...     title = StringField()
+    ...     slug = SlugField(populate_from='title', queryset_manager='all_objects')
+    ...     is_draft = BooleanField(default=True)
+    ...
+    ...     @queryset_manager
+    ...     def objects(doc_cls, queryset):
+    ...         # By default -- never show drafts courses
+    ...         return queryset.filter(draft=False)
+    ...
+    ...     @queryset_manager
+    ...     def draft_objects(doc_cls, queryset):
+    ...         return queryset.filter(draft=True)
+    ...
+    ...     @queryset_manager
+    ...     def all_objects(doc_cls, queryset):
+    ...         # Use `Page.all_objects()` to access all pages (drafts and non-drafts)
+    ...         return queryset
+    ...
+    >>> page1 = Page(title=u'Front page').save()
+    >>> page2 = Page(title=u'Front page').save()
+    >>> page2.slug
+    u'front-page-1'
+
 Dependencies
 ------------
 Tested with following versions:

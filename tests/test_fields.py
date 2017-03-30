@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from mongoengine import Document, StringField
-from mongoengine.errors import ValidationError
+from mongoengine import BooleanField, Document, queryset_manager, StringField
+from mongoengine.errors import NotUniqueError, ValidationError
 from mongoengine_slugfield.fields import SlugField
 
 
@@ -179,3 +179,61 @@ def test_slugify_kwargs(conn):
     page = Page(title=u'Я ♥ борщ').save()
     assert page.title == u'\u042f \u2665 \u0431\u043e\u0440\u0449'
     assert page.slug == u'i-love-borshch'
+
+
+def test_custom_queryset(conn):
+    """Test that it's possible to use a custom queryset the document having
+    the SlugField
+    """
+
+    # Four scenarios:
+    # (1) No match is found, this is a brand new slug
+    # (2) A matching document is found, but it's this one
+    # (3) A matching document is found but without any number
+    # (4) A matching document is found with an incrementing value
+
+    class Page(Document):
+        title = StringField()
+        slug = SlugField(populate_from='title')
+        is_draft = BooleanField(default=True)
+
+        @queryset_manager
+        def objects(doc_cls, queryset):
+            # By default -- never show drafts courses
+            return queryset.filter(is_draft=False)
+
+        @queryset_manager
+        def draft_objects(doc_cls, queryset):
+            return queryset.filter(is_draft=True)
+
+        @queryset_manager
+        def all_objects(doc_cls, queryset):
+            # Use `Page.all_objects()` to access all pages (drafts and non-drafts)
+            return queryset
+
+    page1 = Page(title=u'Front page').save()
+    with pytest.raises(NotUniqueError):
+        page2 = Page(title=u'Front page').save()
+
+    class Page(Document):
+        title = StringField()
+        slug = SlugField(populate_from='title', queryset_manager='all_objects')
+        is_draft = BooleanField(default=True)
+
+        @queryset_manager
+        def objects(doc_cls, queryset):
+            # By default -- never show drafts courses
+            return queryset.filter(is_draft=False)
+
+        @queryset_manager
+        def draft_objects(doc_cls, queryset):
+            return queryset.filter(is_draft=True)
+
+        @queryset_manager
+        def all_objects(doc_cls, queryset):
+            # Use `Page.all_objects()` to access all pages (drafts and non-drafts)
+            return queryset
+
+    page3 = Page(title=u'About page').save()
+    page4 = Page(title=u'About page').save()
+    assert page4.slug == u'about-page-1'

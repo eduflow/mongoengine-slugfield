@@ -11,4 +11,4 @@ def get_version():
 
 __version__ = get_version()
 
-from fields import SlugField
+from .fields import SlugField

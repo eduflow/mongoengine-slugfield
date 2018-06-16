@@ -10,7 +10,7 @@ __all__ = ('SlugField')
 
 
 def create_slug_signal(sender, document):
-    for fieldname, field in document._fields.iteritems():
+    for fieldname, field in document._fields.items():
         if isinstance(field, SlugField):
             if document.pk and not getattr(field, 'always_update'):
                 continue

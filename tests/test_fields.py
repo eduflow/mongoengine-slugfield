@@ -132,10 +132,10 @@ def test_unicode_slugify(conn):
         title = StringField()
         slug = SlugField(populate_from='title')
 
-    document = PageWithUnicodeSlug(title=u'Мобильные технологии в образовании')
+    document = PageWithUnicodeSlug(title='Мобильные технологии в образовании')
     document.save()
 
-    assert document.slug == u'мобильные-технологии-в-образовании'
+    assert document.slug == 'мобильные-технологии-в-образовании'
 
 
 def test_no_unicode_slugify(conn):
@@ -143,18 +143,18 @@ def test_no_unicode_slugify(conn):
         title = StringField()
         slug = SlugField(populate_from='title', allow_unicode=False)
 
-    document = PageWithUnicodeSlug(title=u'Мобильные технологии в образовании')
+    document = PageWithUnicodeSlug(title='Мобильные технологии в образовании')
     document.save()
 
-    assert document.slug == u'mobilnye-tekhnologii-v-obrazovanii'
+    assert document.slug == 'mobilnye-tekhnologii-v-obrazovanii'
 
 
 def test_slugify(conn):
     class Page(Document):
         title = StringField()
         slug = SlugField(populate_from='title')
-    page = Page(title=u'Я ♥ борщ').save()
-    assert page.slug == u'\u044f-\u0431\u043e\u0440\u0449'
+    page = Page(title='Я ♥ борщ').save()
+    assert page.slug == '\u044f-\u0431\u043e\u0440\u0449'
     # >>> print page.slug
     # я-борщ
 
@@ -165,20 +165,20 @@ def test_allow_unicode(conn):
     class Page(Document):
         title = StringField()
         slug = SlugField(populate_from='title', allow_unicode=False)
-    page = Page(title=u'Я ♥ борщ').save()
-    assert page.slug == u'ia-borshch'
+    page = Page(title='Я ♥ борщ').save()
+    assert page.slug == 'ia-borshch'
 
 
 def test_slugify_kwargs(conn):
     '''Test than parameters can be passed directly to `awesome-slugify`'s
     `Slugify()`-class with `slugify_kwargs`'''
-    custom_slugify_args = {'pretranslate': {u'я': u'i', u'♥': u'love'}}
+    custom_slugify_args = {'pretranslate': {'я': 'i', '♥': 'love'}}
     class Page(Document):
         title = StringField()
         slug = SlugField(populate_from='title', allow_unicode=False, slugify_kwargs=custom_slugify_args)
-    page = Page(title=u'Я ♥ борщ').save()
-    assert page.title == u'\u042f \u2665 \u0431\u043e\u0440\u0449'
-    assert page.slug == u'i-love-borshch'
+    page = Page(title='Я ♥ борщ').save()
+    assert page.title == '\u042f \u2665 \u0431\u043e\u0440\u0449'
+    assert page.slug == 'i-love-borshch'
 
 
 def test_custom_queryset(conn):
@@ -211,9 +211,9 @@ def test_custom_queryset(conn):
             # Use `Page.all_objects()` to access all pages (drafts and non-drafts)
             return queryset
 
-    page1 = Page(title=u'Front page').save()
+    page1 = Page(title='Front page').save()
     with pytest.raises(NotUniqueError):
-        page2 = Page(title=u'Front page').save()
+        page2 = Page(title='Front page').save()
 
     class Page(Document):
         title = StringField()
@@ -234,6 +234,6 @@ def test_custom_queryset(conn):
             # Use `Page.all_objects()` to access all pages (drafts and non-drafts)
             return queryset
 
-    page3 = Page(title=u'About page').save()
-    page4 = Page(title=u'About page').save()
-    assert page4.slug == u'about-page-1'
+    page3 = Page(title='About page').save()
+    page4 = Page(title='About page').save()
+    assert page4.slug == 'about-page-1'
